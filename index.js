@@ -1,5 +1,7 @@
 const request = require('request');
 const cheerio = require('cheerio');
+const fs = require('fs');
+const writeStream = fs.createWriteStream('articles.csv');
 
 request('https://faa.dk/svendborg', (error, response, html) => {
     if(!error && response.statusCode == 200) {
@@ -10,15 +12,16 @@ request('https://faa.dk/svendborg', (error, response, html) => {
         const lists = $('.list');
 
         lists.each((index, element) => {
-            const title = $(element).find('.list__title');
-            const list = $(element).find('ul');
-            if(title.text() === "Seneste plus") {
+            const title = $(element).find('.list__title').text();
+            const list = $(element).find('ul').text().replace(/\s\s\n/, '');
+            if(title === "Seneste plus") {
                 return
             }
-            console.log(title.text().replace(/\s\s+/g, ''));
-            console.log("---------------------------------");
-            console.log(list.text().replace(/\s\s+/g, ''));
-            
+
+            //Write a row to CSV (headers)
+            writeStream.write(`${title} \n ${list} \n`)
         })
+
+        console.log("Scraping complete");
     }
 })
