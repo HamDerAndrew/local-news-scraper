@@ -12,16 +12,31 @@ request('https://faa.dk/svendborg', (error, response, html) => {
         const lists = $('.list');
 
         lists.each((index, element) => {
+            const articles = [];
             const title = $(element).find('.list__title').text();
-            const list = $(element).find('ul').text().replace(/\s\s\n/, '');
+            const list = $(element).find('.list-article__title');
+            //const list = $(element).find('.list-article__title').text().replace(/[a-z][A-Z]/gm, '\n');
+            
             if(title === "Seneste plus") {
                 return
             }
+            
+            list.each((i, item) => {
+                const listItem = $(item).text();
+                articles.push(`${listItem}\n`)
+                
+            });
+
+            console.log(articles);
 
             //Write a row to CSV (headers)
-            writeStream.write(`${title} \n ${list} \n`)
+            writeStream.write(`${title} \n ${articles} \n`);
         })
 
         console.log("Scraping complete");
-    }
-})
+
+    } else {
+        console.log(error);
+        console.log(response);
+    };
+});
